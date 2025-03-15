@@ -357,8 +357,10 @@
             initGame();
         }
 
-        // Start the game
-        setDifficulty('easy');
+        // Start the game when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            setDifficulty('easy');
+        });
     </script>
 </body>
 </html>
