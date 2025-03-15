@@ -46,7 +46,7 @@
         
         .game-board {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             grid-gap: 10px;
         }
         
@@ -113,13 +113,7 @@
             cursor: pointer;
         }
         
-        @media (max-width: 1200px) {
-            .game-board {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
-        
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .game-board {
                 grid-template-columns: repeat(4, 1fr);
             }
