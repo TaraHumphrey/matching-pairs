@@ -187,11 +187,7 @@
             { role: "Podiatrist", description: "Treats and manages foot problems" },
             { role: "Dietitian", description: "Provides advice for diet-related conditions" },
             { role: "Nursing Associate", description: "Supports registered nurses and maintains records" },
-            { role: "Mental Health Practitioner", description: "Supports adults with complex mental health needs" },
-            { role: "Physician Associate", description: "Manages undiagnosed cases with clinical decisions" },
-            { role: "General Practice Assistant", description: "Arranges clinical and administrative support" },
-            { role: "Digital Transformation Lead", description: "Improves adoption of digital tools" },
-            { role: "Advanced Practitioner", description: "Manages complex co-morbidities across specialties" }
+            { role: "Mental Health Practitioner", description: "Supports adults with complex mental health needs" }
         ];
 
         // Game state
@@ -248,9 +244,9 @@
             if (difficulty === 'easy') {
                 selectedRoles = gameData.slice(0, 6);
             } else if (difficulty === 'medium') {
-                selectedRoles = gameData.slice(0, 10);
+                selectedRoles = gameData.slice(0, 8);
             } else {
-                selectedRoles = gameData;
+                selectedRoles = gameData; // Now only 12 roles total
             }
             
             // Create card pairs
