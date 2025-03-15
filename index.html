@@ -1,220 +1,364 @@
-import React, { useState, useEffect } from 'react';
-
-const MatchingGame = () => {
-  // Game state
-  const [cards, setCards] = useState([]);
-  const [flipped, setFlipped] = useState([]);
-  const [solved, setSolved] = useState([]);
-  const [moves, setMoves] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [difficulty, setDifficulty] = useState('easy'); // easy, medium, hard
-
-  // Original data for the game
-  const gameData = [
-    { role: "Clinical/Senior Pharmacist", description: "Conducts structured medication reviews and provides prescribing/deprescribing services", imageUrl: "/api/placeholder/120/120" },
-    { role: "Pharmacy Technician", description: "Manages prescriptions and conducts medicines reconciliation", imageUrl: "/api/placeholder/130/120" },
-    { role: "Social Prescribing Link Worker", description: "Connects people to community-based activities, groups and services", imageUrl: "/api/placeholder/140/120" },
-    { role: "Health and Wellbeing Coach", description: "Uses coaching skills to support people to make informed health choices", imageUrl: "/api/placeholder/120/130" },
-    { role: "Care Co-ordinator", description: "Provides co-ordination and navigation through health and care systems", imageUrl: "/api/placeholder/130/130" },
-    { role: "First Contact Physiotherapist", description: "Assesses, diagnoses, treats and manages musculoskeletal problems", imageUrl: "/api/placeholder/140/130" },
-    { role: "Paramedic", description: "Performs home visits for urgent assessment and manages minor illness", imageUrl: "/api/placeholder/120/140" },
-    { role: "Occupational Therapist", description: "Helps people find ways to continue with everyday activities", imageUrl: "/api/placeholder/130/140" },
-    { role: "Podiatrist", description: "Diagnoses, treats and manages foot problems from various diseases", imageUrl: "/api/placeholder/140/140" },
-    { role: "Dietitian", description: "Provides specialist advice for diabetes, weight management, and food allergies", imageUrl: "/api/placeholder/120/150" },
-    { role: "Nursing Associate", description: "Enables registered nurses to provide care and maintains health records", imageUrl: "/api/placeholder/130/150" },
-    { role: "Mental Health Practitioner", description: "Supports adults with complex mental health needs", imageUrl: "/api/placeholder/140/150" },
-    { role: "Physician Associate", description: "Manages undiagnosed cases through examination and clinical decision-making", imageUrl: "/api/placeholder/120/160" },
-    { role: "General Practice Assistant", description: "Arranges clinical support and provides administrative assistance", imageUrl: "/api/placeholder/130/160" },
-    { role: "Digital Transformation Lead", description: "Undertakes improvement projects including adoption of digital tools", imageUrl: "/api/placeholder/140/160" },
-    { role: "Advanced Practitioner", description: "Assesses patients and manages complex co-morbidities across specialties", imageUrl: "/api/placeholder/120/170" }
-  ];
-
-  // Initialize or reset the game
-  const initializeGame = () => {
-    let selectedRoles;
-    
-    // Select roles based on difficulty
-    if (difficulty === 'easy') {
-      selectedRoles = gameData.slice(0, 6);
-    } else if (difficulty === 'medium') {
-      selectedRoles = gameData.slice(0, 10);
-    } else {
-      selectedRoles = gameData;
-    }
-    
-    // Create pairs (role and description)
-    let cardPairs = [];
-    selectedRoles.forEach(item => {
-      cardPairs.push({ 
-        id: `role-${item.role}`, 
-        content: item.role, 
-        type: 'role', 
-        matchId: `desc-${item.role}`,
-        imageUrl: item.imageUrl
-      });
-      cardPairs.push({ 
-        id: `desc-${item.role}`, 
-        content: item.description, 
-        type: 'description', 
-        matchId: `role-${item.role}` 
-      });
-    });
-    
-    // Shuffle cards
-    cardPairs.sort(() => Math.random() - 0.5);
-    
-    setCards(cardPairs);
-    setFlipped([]);
-    setSolved([]);
-    setMoves(0);
-    setGameOver(false);
-    setGameStarted(true);
-  };
-  
-  // Handle card click
-  const handleCardClick = (id) => {
-    // Don't allow clicks if game over or card already flipped/solved
-    if (gameOver || flipped.includes(id) || solved.includes(id) || flipped.length >= 2) {
-      return;
-    }
-    
-    // Flip the card
-    const newFlipped = [...flipped, id];
-    setFlipped(newFlipped);
-    
-    // If two cards are flipped, check for match
-    if (newFlipped.length === 2) {
-      setMoves(prevMoves => prevMoves + 1);
-      
-      const firstCard = cards.find(card => card.id === newFlipped[0]);
-      const secondCard = cards.find(card => card.id === newFlipped[1]);
-      
-      // Check if cards match
-      if (firstCard.matchId === secondCard.id) {
-        setSolved(prevSolved => [...prevSolved, firstCard.id, secondCard.id]);
-        setFlipped([]);
-      } else {
-        // If not a match, flip back after delay
-        setTimeout(() => {
-          setFlipped([]);
-        }, 1500);
-      }
-    }
-  };
-  
-  // Check for game over
-  useEffect(() => {
-    if (solved.length === cards.length && cards.length > 0) {
-      setGameOver(true);
-      setGameStarted(false);
-    }
-  }, [solved, cards]);
-  
-  // Initialize the game with default settings if gameData is loaded
-  useEffect(() => {
-    if (gameData.length > 0 && !gameStarted && !gameOver) {
-      // Auto-start with 'easy' difficulty
-      setDifficulty('easy');
-      initializeGame();
-    }
-  }, []);
-
-  return (
-    <div className="flex flex-col items-center p-4 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Healthcare Roles Matching Game</h1>
-      
-      <div className="flex justify-between w-full mb-4">
-        <div className="text-lg font-medium">Moves: {moves}</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Roles Matching Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
         
-        <div className="flex space-x-2">
-          <button
-            onClick={() => {
-              setDifficulty('easy');
-              initializeGame();
-            }}
-            className={`px-3 py-1 rounded ${difficulty === 'easy' ? 'bg-[#00999E] text-white' : 'bg-gray-200'}`}
-          >
-            Easy
-          </button>
-          <button
-            onClick={() => {
-              setDifficulty('medium');
-              initializeGame();
-            }}
-            className={`px-3 py-1 rounded ${difficulty === 'medium' ? 'bg-[#00999E] text-white' : 'bg-gray-200'}`}
-          >
-            Medium
-          </button>
-          <button
-            onClick={() => {
-              setDifficulty('hard');
-              initializeGame();
-            }}
-            className={`px-3 py-1 rounded ${difficulty === 'hard' ? 'bg-[#00999E] text-white' : 'bg-gray-200'}`}
-          >
-            Hard
-          </button>
+        h1 {
+            color: #00999E;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .difficulty button {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .difficulty button.active {
+            background-color: #00999E;
+            color: white;
+        }
+        
+        .game-stats {
+            font-weight: bold;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 15px;
+        }
+        
+        .card {
+            height: 120px;
+            background-color: #00999E;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card.flipped, .card.solved {
+            background-color: white;
+            color: #333;
+            border: 2px solid #ccc;
+        }
+        
+        .card.solved {
+            border-color: #4CAF50;
+        }
+        
+        .card-content {
+            display: none;
+        }
+        
+        .card.flipped .card-content, 
+        .card.solved .card-content {
+            display: block;
+        }
+        
+        .card-placeholder {
+            font-size: 2em;
+        }
+        
+        .card.flipped .card-placeholder, 
+        .card.solved .card-placeholder {
+            display: none;
+        }
+        
+        .victory-message {
+            background-color: #E8F5E9;
+            border: 1px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .victory-message button {
+            background-color: #00999E;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Healthcare Roles Matching Game</h1>
+    
+    <div class="game-controls">
+        <div class="game-stats">
+            Moves: <span id="move-counter">0</span>
         </div>
-      </div>
-      
-      {gameOver ? (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4 w-full text-center">
-          <p className="font-bold">Congratulations!</p>
-          <p>You completed the game in {moves} moves.</p>
-          <button
-            onClick={() => {
-              initializeGame();
-            }}
-            className="mt-4 bg-[#00999E] hover:bg-teal-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Play Again
-          </button>
+        
+        <div class="difficulty">
+            <button id="easy-btn" class="active">Easy</button>
+            <button id="medium-btn">Medium</button>
+            <button id="hard-btn">Hard</button>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
-          {cards.map((card) => (
-            <div
-              key={card.id}
-              onClick={() => handleCardClick(card.id)}
-              className={`
-                h-40 md:h-40 
-                rounded-lg shadow-md 
-                flex flex-col items-center justify-center 
-                cursor-pointer
-                transition-all duration-300
-                p-2
-                ${flipped.includes(card.id) || solved.includes(card.id) 
-                  ? 'bg-white border-2' 
-                  : 'bg-[#00999E] text-white'}
-                ${solved.includes(card.id) ? 'border-green-500' : ''}
-                ${card.type === 'role' ? 'font-bold' : ''}
-              `}
-            >
-              {(flipped.includes(card.id) || solved.includes(card.id)) ? (
-                <>
-                  {card.type === 'role' && (
-                    <div className="mb-2">
-                      <img 
-                        src={card.imageUrl} 
-                        alt={card.content} 
-                        className="w-16 h-16 rounded-full object-cover mb-1"
-                      />
-                    </div>
-                  )}
-                  <div className="text-center text-sm md:text-base text-gray-800">
-                    {card.content}
-                  </div>
-                </>
-              ) : (
-                <div className="text-4xl">?</div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
-  );
-};
+    
+    <div id="victory-message" class="victory-message">
+        <h2>Congratulations!</h2>
+        <p>You completed the game in <span id="final-moves">0</span> moves.</p>
+        <button id="play-again-btn">Play Again</button>
+    </div>
+    
+    <div id="game-board" class="game-board">
+        <!-- Cards will be added here by JavaScript -->
+    </div>
 
-export default MatchingGame;
+    <script>
+        // Game data - healthcare roles and descriptions
+        const gameData = [
+            { role: "Clinical/Senior Pharmacist", description: "Conducts structured medication reviews and prescribing" },
+            { role: "Pharmacy Technician", description: "Manages prescriptions and medicines reconciliation" },
+            { role: "Social Prescribing Link Worker", description: "Connects people to community activities and services" },
+            { role: "Health and Wellbeing Coach", description: "Supports people to make informed health choices" },
+            { role: "Care Co-ordinator", description: "Provides navigation through health and care systems" },
+            { role: "First Contact Physiotherapist", description: "Manages musculoskeletal problems" },
+            { role: "Paramedic", description: "Performs urgent home visits and manages minor illness" },
+            { role: "Occupational Therapist", description: "Helps continue with everyday activities" },
+            { role: "Podiatrist", description: "Treats and manages foot problems" },
+            { role: "Dietitian", description: "Provides advice for diet-related conditions" },
+            { role: "Nursing Associate", description: "Supports registered nurses and maintains records" },
+            { role: "Mental Health Practitioner", description: "Supports adults with complex mental health needs" },
+            { role: "Physician Associate", description: "Manages undiagnosed cases with clinical decisions" },
+            { role: "General Practice Assistant", description: "Arranges clinical and administrative support" },
+            { role: "Digital Transformation Lead", description: "Improves adoption of digital tools" },
+            { role: "Advanced Practitioner", description: "Manages complex co-morbidities across specialties" }
+        ];
+
+        // Game state
+        let cards = [];
+        let flippedCards = [];
+        let solvedCards = [];
+        let moves = 0;
+        let difficulty = 'easy';
+        let gameStarted = false;
+        let gameOver = false;
+
+        // DOM elements
+        const gameBoard = document.getElementById('game-board');
+        const moveCounter = document.getElementById('move-counter');
+        const victoryMessage = document.getElementById('victory-message');
+        const finalMoves = document.getElementById('final-moves');
+        const easyBtn = document.getElementById('easy-btn');
+        const mediumBtn = document.getElementById('medium-btn');
+        const hardBtn = document.getElementById('hard-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Setup difficulty buttons
+        easyBtn.addEventListener('click', () => {
+            setDifficulty('easy');
+        });
+        
+        mediumBtn.addEventListener('click', () => {
+            setDifficulty('medium');
+        });
+        
+        hardBtn.addEventListener('click', () => {
+            setDifficulty('hard');
+        });
+        
+        playAgainBtn.addEventListener('click', () => {
+            initGame();
+        });
+
+        // Initialize game
+        function initGame() {
+            // Reset game state
+            flippedCards = [];
+            solvedCards = [];
+            moves = 0;
+            gameOver = false;
+            
+            // Update UI
+            moveCounter.textContent = '0';
+            gameBoard.innerHTML = '';
+            victoryMessage.style.display = 'none';
+            
+            // Select roles based on difficulty
+            let selectedRoles;
+            if (difficulty === 'easy') {
+                selectedRoles = gameData.slice(0, 6);
+            } else if (difficulty === 'medium') {
+                selectedRoles = gameData.slice(0, 10);
+            } else {
+                selectedRoles = gameData;
+            }
+            
+            // Create card pairs
+            cards = [];
+            selectedRoles.forEach(item => {
+                // Role card
+                cards.push({
+                    id: `role-${item.role}`,
+                    content: item.role,
+                    type: 'role',
+                    matchId: `desc-${item.role}`
+                });
+                
+                // Description card
+                cards.push({
+                    id: `desc-${item.role}`,
+                    content: item.description,
+                    type: 'description',
+                    matchId: `role-${item.role}`
+                });
+            });
+            
+            // Shuffle cards
+            cards.sort(() => Math.random() - 0.5);
+            
+            // Add cards to the board
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.dataset.id = card.id;
+                
+                // Card back (question mark)
+                const placeholder = document.createElement('div');
+                placeholder.className = 'card-placeholder';
+                placeholder.textContent = '?';
+                cardElement.appendChild(placeholder);
+                
+                // Card front (content)
+                const content = document.createElement('div');
+                content.className = 'card-content';
+                content.textContent = card.content;
+                
+                if (card.type === 'role') {
+                    content.style.fontWeight = 'bold';
+                }
+                
+                cardElement.appendChild(content);
+                
+                // Add click event
+                cardElement.addEventListener('click', () => handleCardClick(card.id));
+                
+                gameBoard.appendChild(cardElement);
+            });
+            
+            gameStarted = true;
+        }
+
+        // Handle card click
+        function handleCardClick(id) {
+            // Don't allow clicks if game is over or card is already flipped/solved
+            if (gameOver || flippedCards.includes(id) || solvedCards.includes(id) || flippedCards.length >= 2) {
+                return;
+            }
+            
+            // Flip the card
+            const cardElement = document.querySelector(`.card[data-id="${id}"]`);
+            cardElement.classList.add('flipped');
+            flippedCards.push(id);
+            
+            // If two cards are flipped, check for match
+            if (flippedCards.length === 2) {
+                moves++;
+                moveCounter.textContent = moves;
+                
+                const firstCard = cards.find(card => card.id === flippedCards[0]);
+                const secondCard = cards.find(card => card.id === flippedCards[1]);
+                
+                // Check if cards match
+                if (firstCard.matchId === secondCard.id) {
+                    // Mark as solved
+                    const firstCardElement = document.querySelector(`.card[data-id="${firstCard.id}"]`);
+                    const secondCardElement = document.querySelector(`.card[data-id="${secondCard.id}"]`);
+                    
+                    firstCardElement.classList.remove('flipped');
+                    secondCardElement.classList.remove('flipped');
+                    
+                    firstCardElement.classList.add('solved');
+                    secondCardElement.classList.add('solved');
+                    
+                    solvedCards.push(firstCard.id, secondCard.id);
+                    flippedCards = [];
+                    
+                    // Check for game over
+                    if (solvedCards.length === cards.length) {
+                        gameOver = true;
+                        gameStarted = false;
+                        
+                        // Show victory message
+                        finalMoves.textContent = moves;
+                        victoryMessage.style.display = 'block';
+                    }
+                } else {
+                    // If not a match, flip back after delay
+                    setTimeout(() => {
+                        const firstCardElement = document.querySelector(`.card[data-id="${firstCard.id}"]`);
+                        const secondCardElement = document.querySelector(`.card[data-id="${secondCard.id}"]`);
+                        
+                        firstCardElement.classList.remove('flipped');
+                        secondCardElement.classList.remove('flipped');
+                        
+                        flippedCards = [];
+                    }, 1500);
+                }
+            }
+        }
+
+        // Set difficulty and restart game
+        function setDifficulty(level) {
+            difficulty = level;
+            
+            // Update active button
+            easyBtn.classList.remove('active');
+            mediumBtn.classList.remove('active');
+            hardBtn.classList.remove('active');
+            
+            if (level === 'easy') {
+                easyBtn.classList.add('active');
+            } else if (level === 'medium') {
+                mediumBtn.classList.add('active');
+            } else {
+                hardBtn.classList.add('active');
+            }
+            
+            initGame();
+        }
+
+        // Start the game
+        setDifficulty('easy');
+    </script>
+</body>
+</html>
